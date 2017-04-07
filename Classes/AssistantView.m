@@ -458,9 +458,8 @@ static UICompositeViewDescription *compositeDescription = nil;
 		 ]) {
 		[AssistantView cleanTextField:view];
 #if DEBUG
-		UIAssistantTextField *atf =
-			(UIAssistantTextField *)[self findView:ViewElement_Domain inView:view ofType:UIAssistantTextField.class];
-		atf.text = @"test.linphone.org";
+		//UIAssistantTextField *atf = (UIAssistantTextField *)[self findView:ViewElement_Domain inView:view ofType:UIAssistantTextField.class];
+		//atf.text = @"test.linphone.org";
 #endif
 	}
 	phone_number_length = 0;
@@ -563,8 +562,9 @@ static UICompositeViewDescription *compositeDescription = nil;
 	UIAssistantTextField *domain = [self findTextField:ViewElement_Domain];
 	[domain showError:[AssistantView errorForStatus:LinphoneAccountCreatorDomainInvalid]
 				 when:^BOOL(NSString *inputEntry) {
+                   NSString *completeDomain = [NSString stringWithFormat: @"%s.trsmicloud.com", inputEntry.UTF8String];
 				   LinphoneAccountCreatorStatus s =
-					   linphone_account_creator_set_domain(account_creator, inputEntry.UTF8String);
+					   linphone_account_creator_set_domain(account_creator, completeDomain.UTF8String);
 				   domain.errorLabel.text = [AssistantView errorForStatus:s];
 				   return s != LinphoneAccountCreatorOK;
 				 }];
@@ -1228,6 +1228,7 @@ void assistant_is_account_linked(LinphoneAccountCreator *creator, LinphoneAccoun
 }
 
 - (IBAction)onLoginClick:(id)sender {
+    
 	ONCLICKBUTTON(sender, 100, {
         _waitView.hidden = NO;
         [self configureProxyConfig];
