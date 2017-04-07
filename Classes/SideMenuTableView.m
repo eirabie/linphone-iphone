@@ -48,7 +48,7 @@
 												[PhoneMainView.instance
 													changeCurrentView:AssistantView.compositeViewDescription];
 											  }]];
-	BOOL mustLink = ([LinphoneManager.instance lpConfigIntForKey:@"must_link_account_time"] > 0);
+	/*BOOL mustLink = ([LinphoneManager.instance lpConfigIntForKey:@"must_link_account_time"] > 0);
 	if (mustLink) {
 		[_sideMenuEntries
 			addObject:[[SideMenuEntry alloc] initWithTitle:NSLocalizedString(@"Link my account", nil)
@@ -56,7 +56,7 @@
 													[PhoneMainView.instance
 														changeCurrentView:AssistantLinkView.compositeViewDescription];
 												  }]];
-	}
+	}*/
 
 	[_sideMenuEntries
 		addObject:[[SideMenuEntry alloc] initWithTitle:NSLocalizedString(@"Settings", nil)

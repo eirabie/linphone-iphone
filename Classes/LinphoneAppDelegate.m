@@ -21,7 +21,7 @@
 #import "ContactsListView.h"
 #import "ContactDetailsView.h"
 #import "ShopView.h"
-#import "linphoneAppDelegate.h"
+#import "LinphoneAppDelegate.h"
 #import "AddressBook/ABPerson.h"
 
 #import "CoreTelephony/CTCallCenter.h"
