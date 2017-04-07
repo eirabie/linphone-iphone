@@ -25,6 +25,7 @@
 	CXCallController *callController = [[CXCallController alloc] initWithQueue:dispatch_get_main_queue()];
 	[callController.callObserver setDelegate:self queue:dispatch_get_main_queue()];
 	self.controller = callController;
+	self.callKitCalls = 0;
 
 	if (!self) {
 		LOGD(@"ProviderDelegate not initialized...");
@@ -49,7 +50,9 @@
 }
 
 - (void)configAudioSession:(AVAudioSession *)audioSession {
-	[audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+	[audioSession setCategory:AVAudioSessionCategoryPlayAndRecord
+				  withOptions:AVAudioSessionCategoryOptionAllowBluetooth
+						error:nil];
 	[audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
 	double sampleRate = 44100.0;
 	[audioSession setPreferredSampleRate:sampleRate error:nil];
@@ -77,6 +80,7 @@
 
 - (void)provider:(CXProvider *)provider performAnswerCallAction:(CXAnswerCallAction *)action {
 	LOGD(@"CallKit : Answering Call");
+	self.callKitCalls++;
 	[self configAudioSession:[AVAudioSession sharedInstance]];
 	[action fulfill];
 	NSUUID *uuid = action.callUUID;
@@ -114,6 +118,7 @@
 
 - (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
 	LOGD(@"CallKit : Ending the Call");
+	self.callKitCalls--;
 	[action fulfill];
 	if (linphone_core_is_in_conference(LC)) {
 		LinphoneManager.instance.conf = TRUE;
@@ -126,8 +131,10 @@
 		NSString *callID = [self.calls objectForKey:uuid];
 		LinphoneCall *call = [LinphoneManager.instance callByCallId:callID];
 		if (call) {
-			linphone_core_terminate_call(LC, (LinphoneCall *)call);
+			linphone_call_terminate((LinphoneCall *)call);
 		}
+		[self.uuids removeObjectForKey:callID];
+		[self.calls removeObjectForKey:uuid];
 	}
 }
 
@@ -162,7 +169,7 @@
 	LinphoneCall *call = [LinphoneManager.instance callByCallId:callID];
 	if (call) {
 		if (action.isOnHold) {
-			linphone_core_pause_call(LC, (LinphoneCall *)call);
+			linphone_call_pause((LinphoneCall *)call);
 		} else {
 			[self configAudioSession:[AVAudioSession sharedInstance]];
 			if (linphone_core_get_conference(LC)) {
@@ -195,7 +202,7 @@
 				[LinphoneManager.instance acceptCall:(LinphoneCall *)_pendingCall evenWithVideo:_pendingCallVideo];
 				break;
 			case LinphoneCallPaused:
-				linphone_core_resume_call(LC, (LinphoneCall *)_pendingCall);
+				linphone_call_resume((LinphoneCall *)_pendingCall);
 				break;
 			case LinphoneCallStreamsRunning:
 				// May happen when multiple calls
